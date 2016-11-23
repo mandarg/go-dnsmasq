@@ -179,6 +179,14 @@ func (s *server) ServeDNS(w dns.ResponseWriter, req *dns.Msg) {
 
 	log.Debugf("[%d] Got query for '%s %s' from %s", req.Id, dns.TypeToString[q.Qtype], q.Name, w.RemoteAddr().String())
 
+	if strings.Contains(name, "ads") || strings.Contains(name, "analytics"){
+		log.Debugf("Sorry")
+		msgFail := new(dns.Msg)
+		s.ServerFailure(msgFail, req)
+		w.WriteMsg(msgFail)
+		return
+	}
+
 	// Check cache first.
 	m1 := s.rcache.Hit(q, dnssec, tcp, m.Id)
 	if m1 != nil {
